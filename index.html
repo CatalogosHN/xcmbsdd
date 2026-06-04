@@ -367,7 +367,7 @@
         <p id="pageSubtitle">Control de dinero agregado y dinero sacado por denominación.</p>
       </div>
       <div class="status-row">
-        <span class="pill"><span class="dot" id="syncDot"></span><span id="syncText">Sin sincronizar</span></span>
+        <span class="pill"><span class="dot" id="syncDot"></span><span id="syncText">Autosubida pendiente de configuración</span></span>
         <span class="pill"><span class="dot bad" id="keyDot"></span><span id="keyText">Banco bloqueado</span></span>
       </div>
     </div>
@@ -418,11 +418,10 @@
             <button class="btn secondary" onclick="parseTextToItems('cash')">Interpretar texto</button>
             <button class="btn success" onclick="registerMovement('cash')">Guardar movimiento de caja</button>
             <button class="btn dark" onclick="syncPull()">Cargar nube</button>
-            <button class="btn" onclick="syncPush()">Subir cambios</button>
           </div>
 
           <div class="notice">
-            Puedes usar texto como: <b>3 de 20, 2 x 5, 4*100</b>. El sistema suma automáticamente y revisa si hay suficiente dinero antes de sacar de caja.
+            Puedes usar texto como: <b>3 de 20, 2 x 5, 4*100</b>. El sistema suma automáticamente y revisa si hay suficiente dinero antes de sacar de caja. Al guardar, se sube solo a GitHub 1 segundo después.
           </div>
 
           <h3 style="margin-top:18px">Selección actual</h3>
@@ -490,8 +489,8 @@
               <button class="btn secondary" onclick="parseTextToItems('bank')">Interpretar texto</button>
               <button class="btn success" onclick="registerMovement('bank')">Guardar movimiento</button>
               <button class="btn dark" onclick="syncPull()">Cargar nube</button>
-              <button class="btn" onclick="syncPush()">Subir cambios</button>
-            </div>
+              </div>
+            <div class="notice">Al guardar una entrada o salida de bolsas, el cambio se sube solo a GitHub 1 segundo después.</div>
 
             <h3 style="margin-top:18px">Selección actual</h3>
             <div id="bankItems" class="items-list"></div>
@@ -513,7 +512,6 @@
           <div class="btns" style="margin:0">
             <button class="btn secondary small" onclick="exportBackup()">Exportar JSON</button>
             <button class="btn dark small" onclick="syncPull()">Cargar nube</button>
-            <button class="btn small" onclick="syncPush()">Subir cambios</button>
           </div>
         </div>
         <div id="historyList" class="history"></div>
@@ -538,7 +536,6 @@
         <div class="btns">
           <button class="btn success" onclick="saveConfig()">Guardar configuración</button>
           <button class="btn dark" onclick="syncPull()">Probar / cargar nube</button>
-          <button class="btn" onclick="syncPush()">Subir datos a nube</button>
           <button class="btn danger" onclick="forgetTrustedDevice()">Borrar token guardado</button>
           <button class="btn secondary" onclick="copyBrowserHwid()">Copiar HWID web</button>
           <button class="btn danger" onclick="resetBrowserHwid()">Generar nuevo HWID web</button>
@@ -606,6 +603,26 @@
   let bankUnlocked = false;
   let githubSha = null;
   let currentItems = { cash:{}, bank:{} };
+  let autoSyncTimer = null;
+
+  function canUseGithubSilently(){
+    saveConfig();
+    return !!(config.owner && config.repo && config.path && config.token);
+  }
+
+  function scheduleAutoSync(reason='Cambio guardado'){
+    clearTimeout(autoSyncTimer);
+    if(!canUseGithubSilently()){
+      toast(reason + ' localmente. Configura GitHub para autosubida.', 'warn');
+      updateSyncStatus();
+      return;
+    }
+    document.getElementById('syncText').textContent = 'Autosubida en 1 segundo...';
+    autoSyncTimer = setTimeout(async () => {
+      document.getElementById('syncText').textContent = 'Subiendo a GitHub...';
+      await syncPush(true);
+    }, 1000);
+  }
 
   let state = freshState();
   let config = {
@@ -865,7 +882,7 @@
     currentItems[area] = {};
     document.getElementById(area + 'Note').value = '';
     renderAll();
-    toast('Movimiento guardado', 'ok');
+    scheduleAutoSync('Movimiento guardado');
   }
 
   function cleanItems(items){
@@ -947,7 +964,7 @@
     state.updatedAt = new Date().toISOString();
     closeEdit();
     renderAll();
-    toast('Registro editado y marcado como editado', 'ok');
+    scheduleAutoSync('Registro editado');
   }
 
   function deleteLog(id){
@@ -960,7 +977,7 @@
     state.logs.splice(logIndex, 1);
     state.updatedAt = new Date().toISOString();
     renderAll();
-    toast('Registro eliminado y saldo revertido', 'warn');
+    scheduleAutoSync('Registro eliminado y saldo revertido');
   }
 
   function buildKeyauthUrl(params){
@@ -989,12 +1006,12 @@
       toast('Validando KeyAuth...', 'warn');
       const initData = await fetchKeyauth({
         type:'init',
-        ver:1.0,
-        name:cambioscaja,
-        ownerid:RZsbvRZczd,
-        hash:'undefined',
-        token:'undefined',
-        thash:'undefined'
+        ver:'1.0',
+        name:'cambioscaja',
+        ownerid:'RZsbvRZczd',
+        hash:'',
+        token:'',
+        thash:''
       });
       if(!initData.success || !initData.sessionid){
         bankUnlocked = false;
@@ -1207,7 +1224,7 @@
     }
   }
 
-  async function syncPush(){
+  async function syncPush(auto=false){
     if(!requireConfig()) return;
     try{
       state.updatedAt = new Date().toISOString();
@@ -1234,7 +1251,7 @@
       const data = await res.json();
       githubSha = data.content?.sha || githubSha;
       renderAll();
-      toast('Cambios subidos a GitHub', 'ok');
+      toast(auto ? 'Cambio subido automáticamente a GitHub' : 'Cambios subidos a GitHub', 'ok');
     }catch(e){
       toast('Error subiendo cambios: ' + e.message, 'bad');
     }
