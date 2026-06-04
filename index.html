@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caja de Cambios | Agregar y Sacar Dinero</title>
+  <style>
+    :root{
+      --bg:#eef4ff;
+      --panel:#ffffff;
+      --text:#122033;
+      --muted:#64748b;
+      --primary:#0078ff;
+      --primary2:#00b3ff;
+      --danger:#ef4444;
+      --success:#16a34a;
+      --warning:#f59e0b;
+      --soft:#eaf3ff;
+      --border:#dbe7f5;
+      --shadow:0 18px 50px rgba(15, 41, 77, .12);
+      --radius:22px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, Poppins, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #dcecff 0, transparent 35%), linear-gradient(135deg, #f7fbff, var(--bg));
+      color:var(--text);
+      min-height:100vh;
+    }
+
+    .app{
+      display:grid;
+      grid-template-columns: 285px 1fr;
+      min-height:100vh;
+    }
+
+    aside{
+      background:rgba(255,255,255,.86);
+      backdrop-filter: blur(16px);
+      border-right:1px solid var(--border);
+      padding:22px 18px;
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow:auto;
+    }
+
+    .brand{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      margin-bottom:22px;
+    }
+    .logo{
+      width:48px;height:48px;border-radius:16px;
+      background:linear-gradient(135deg,var(--primary),#7c3aed);
+      color:white;display:grid;place-items:center;font-size:24px;
+      box-shadow:0 12px 26px rgba(0,120,255,.24);
+    }
+    .brand h1{font-size:19px;line-height:1.1;margin:0}
+    .brand small{color:var(--muted)}
+
+    .nav button{
+      width:100%;
+      border:0;
+      background:transparent;
+      color:var(--text);
+      padding:14px 14px;
+      border-radius:16px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin:8px 0;
+      font-weight:800;
+      cursor:pointer;
+      text-align:left;
+    }
+    .nav button.active{
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      color:white;
+      box-shadow:0 12px 24px rgba(0,120,255,.20);
+    }
+    .nav span{font-size:13px;opacity:.8;font-weight:700}
+
+    .side-card{
+      background:linear-gradient(180deg,#ffffff,#f6faff);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:14px;
+      margin-top:18px;
+      box-shadow:0 10px 30px rgba(15,41,77,.06);
+    }
+    .side-card h3{margin:0 0 8px;font-size:14px}
+    .side-card p{margin:6px 0;color:var(--muted);font-size:12px;line-height:1.45}
+
+    main{
+      padding:26px;
+      max-width:1400px;
+      width:100%;
+      margin:0 auto;
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      gap:14px;
+      flex-wrap:wrap;
+      align-items:flex-start;
+      margin-bottom:18px;
+    }
+    .title h2{font-size:28px;margin:0 0 4px}
+    .title p{margin:0;color:var(--muted)}
+
+    .status-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 13px;
+      border-radius:999px;
+      background:white;
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-weight:800;
+      font-size:13px;
+      box-shadow:0 8px 20px rgba(15,41,77,.06);
+    }
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--warning);box-shadow:0 0 0 4px rgba(245,158,11,.15)}
+    .dot.ok{background:var(--success);box-shadow:0 0 0 4px rgba(22,163,74,.15)}
+    .dot.bad{background:var(--danger);box-shadow:0 0 0 4px rgba(239,68,68,.15)}
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.08fr .92fr;
+      gap:18px;
+      align-items:start;
+    }
+    .card{
+      background:rgba(255,255,255,.94);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    .card h3{margin:0 0 12px;font-size:17px}
+    .card-title{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;
+    }
+
+    label{display:block;font-size:13px;font-weight:900;margin:10px 0 7px;color:#24344d}
+    input, select, textarea{
+      width:100%;
+      border:1px solid var(--border);
+      background:#fbfdff;
+      color:var(--text);
+      border-radius:14px;
+      padding:12px 13px;
+      outline:none;
+      font:inherit;
+      transition:.15s ease;
+    }
+    textarea{min-height:86px;resize:vertical}
+    input:focus, select:focus, textarea:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(0,120,255,.10);background:white}
+
+    .form-row{display:grid;grid-template-columns: 1fr 1fr;gap:12px}
+    .form-row.three{grid-template-columns: 1.2fr .8fr auto;align-items:end}
+
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    button.btn{
+      border:0;
+      padding:12px 15px;
+      border-radius:14px;
+      font-weight:900;
+      cursor:pointer;
+      color:white;
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      box-shadow:0 12px 24px rgba(0,120,255,.17);
+      transition:.12s ease;
+    }
+    button.btn:hover{transform:translateY(-1px)}
+    button.btn:active{transform:translateY(0)}
+    button.btn.secondary{background:#eef6ff;color:#0f3a68;box-shadow:none;border:1px solid var(--border)}
+    button.btn.success{background:linear-gradient(135deg,#16a34a,#22c55e)}
+    button.btn.danger{background:linear-gradient(135deg,#ef4444,#f97316)}
+    button.btn.dark{background:linear-gradient(135deg,#0f172a,#334155)}
+    button.btn.warn{background:linear-gradient(135deg,#f59e0b,#f97316)}
+    button.btn.small{padding:9px 11px;border-radius:11px;font-size:12px}
+    button.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-bottom:18px;
+    }
+    .metric{
+      border-radius:20px;
+      background:linear-gradient(180deg,#fff,#f5f9ff);
+      border:1px solid var(--border);
+      padding:15px;
+      box-shadow:0 10px 28px rgba(15,41,77,.07);
+    }
+    .metric small{display:block;color:var(--muted);font-weight:800;margin-bottom:7px}
+    .metric strong{font-size:24px;letter-spacing:-.6px}
+
+    .denom-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(112px,1fr));
+      gap:10px;
+    }
+    .denom{
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:12px;
+      background:#fbfdff;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .denom b{font-size:15px}
+    .denom span{font-size:12px;color:var(--muted);font-weight:800}
+
+    .items-list{display:flex;flex-direction:column;gap:9px;margin-top:12px}
+    .item-row{
+      display:grid;
+      grid-template-columns: 1fr 110px 38px;
+      gap:9px;
+      align-items:center;
+      background:#f8fbff;
+      border:1px solid var(--border);
+      border-radius:15px;
+      padding:9px;
+    }
+    .item-row button{height:38px;border-radius:12px;border:0;background:#fee2e2;color:#991b1b;font-weight:900;cursor:pointer}
+
+    .history{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      max-height:620px;
+      overflow:auto;
+      padding-right:4px;
+    }
+    .log{
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:#fbfdff;
+      padding:13px;
+    }
+    .log-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:8px}
+    .log-title{font-weight:950}
+    .log-meta{font-size:12px;color:var(--muted);line-height:1.55}
+    .tag{
+      display:inline-flex;align-items:center;
+      border-radius:999px;
+      padding:6px 9px;
+      font-size:12px;
+      font-weight:950;
+      background:#eaf3ff;
+      color:#075985;
+      white-space:nowrap;
+    }
+    .tag.out{background:#fee2e2;color:#991b1b}
+    .tag.in{background:#dcfce7;color:#166534}
+    .tag.edit{background:#fef3c7;color:#92400e}
+    .log-detail{color:#26354d;font-size:13px;line-height:1.45}
+    .log-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+    .config-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .hidden{display:none!important}
+    .section{display:none}
+    .section.active{display:block}
+
+    .locked{
+      border:1px dashed #f59e0b;
+      background:linear-gradient(180deg,#fffbeb,#ffffff);
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:12px;
+    }
+    .locked h4{margin:0 0 8px}
+    .locked p{margin:0;color:#7c4a03;font-size:13px;line-height:1.45}
+
+    .notice{
+      padding:12px 14px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      background:#f8fbff;
+      color:#40516a;
+      font-size:13px;
+      line-height:1.45;
+      margin-top:12px;
+    }
+    .notice.danger{background:#fff1f2;border-color:#fecdd3;color:#9f1239}
+    .notice.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+
+    dialog{
+      border:0;
+      padding:0;
+      border-radius:24px;
+      box-shadow:0 30px 90px rgba(0,0,0,.25);
+      width:min(760px,calc(100vw - 28px));
+    }
+    dialog::backdrop{background:rgba(15,23,42,.46);backdrop-filter: blur(3px)}
+    .modal{padding:18px;background:white;border-radius:24px}
+    .modal-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:10px}
+    .modal-head h3{margin:0}
+
+    .toast-wrap{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;z-index:99}
+    .toast{
+      padding:13px 15px;
+      border-radius:16px;
+      background:#0f172a;
+      color:white;
+      box-shadow:0 18px 40px rgba(15,23,42,.25);
+      font-weight:800;
+      max-width:360px;
+    }
+    .toast.ok{background:#166534}.toast.bad{background:#991b1b}.toast.warn{background:#92400e}
+
+    @media(max-width:980px){
+      .app{grid-template-columns:1fr}
+      aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--border)}
+      .grid{grid-template-columns:1fr}
+      .summary{grid-template-columns:1fr}
+      .config-grid,.form-row,.form-row.three{grid-template-columns:1fr}
+      main{padding:16px}
+      .status-row{justify-content:flex-start}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand">
+      <div class="logo">💵</div>
+      <div>
+        <h1>Caja de Cambios</h1>
+        <small>Agregar dinero / sacar dinero / banco</small>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="active" data-tab="cash">Caja de cambios <span>Billetes</span></button>
+      <button data-tab="bank">Banco / Bolsas <span>KeyAuth</span></button>
+      <button data-tab="history">Historial <span>Registros</span></button>
+      <button data-tab="settings">Configuración <span>Token</span></button>
+    </nav>
+
+    <div class="side-card">
+      <h3>Resumen rápido</h3>
+      <p><b>Caja:</b> <span id="sideCash">L 0.00</span></p>
+      <p><b>Banco / bolsas:</b> <span id="sideBank">L 0.00</span></p>
+      <p><b>Total general:</b> <span id="sideGrand">L 0.00</span></p>
+    </div>
+
+    <div class="side-card">
+      <h3>Seguridad</h3>
+      <p>El token de GitHub solo se guarda si marcas este equipo como dispositivo de confianza. La licencia KeyAuth no se guarda; solo se conserva el HWID web del navegador.</p>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="title">
+        <h2 id="pageTitle">Caja de cambios</h2>
+        <p id="pageSubtitle">Control de dinero agregado y dinero sacado por denominación.</p>
+      </div>
+      <div class="status-row">
+        <span class="pill"><span class="dot" id="syncDot"></span><span id="syncText">Sin sincronizar</span></span>
+        <span class="pill"><span class="dot bad" id="keyDot"></span><span id="keyText">Banco bloqueado</span></span>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="metric"><small>Total caja de cambios</small><strong id="cashTotal">L 0.00</strong></div>
+      <div class="metric"><small>Total banco / bolsas</small><strong id="bankTotal">L 0.00</strong></div>
+      <div class="metric"><small>Total general</small><strong id="grandTotal">L 0.00</strong></div>
+    </div>
+
+    <section id="cash" class="section active">
+      <div class="grid">
+        <div class="card">
+          <div class="card-title">
+            <h3>Agregar dinero a caja de cambios / sacar dinero de caja</h3>
+            <button class="btn secondary small" onclick="clearCurrentItems()">Limpiar selección</button>
+          </div>
+
+          <div class="form-row">
+            <div>
+              <label>Tipo de movimiento</label>
+              <select id="cashAction">
+                <option value="in">Agregar dinero a caja de cambios</option>
+                <option value="out">Sacar dinero de caja</option>
+              </select>
+            </div>
+            <div>
+              <label>Nota o motivo</label>
+              <input id="cashNote" placeholder="Ej: cambio para motorista, venta, vuelto..." />
+            </div>
+          </div>
+
+          <div class="form-row three">
+            <div>
+              <label>Billete / moneda disponible</label>
+              <select id="cashDenom"></select>
+            </div>
+            <div>
+              <label>Cantidad</label>
+              <input id="cashQty" type="number" min="1" step="1" placeholder="Ej: 3" />
+            </div>
+            <button class="btn secondary" onclick="addItemFromSelect('cash')">Agregar</button>
+          </div>
+
+          <label>Texto rápido para agregar o sacar dinero</label>
+          <textarea id="cashText" placeholder="Ej: 3 de 20, 2 de 5, 4 de 100"></textarea>
+          <div class="btns">
+            <button class="btn secondary" onclick="parseTextToItems('cash')">Interpretar texto</button>
+            <button class="btn success" onclick="registerMovement('cash')">Guardar movimiento de caja</button>
+            <button class="btn dark" onclick="syncPull()">Cargar nube</button>
+            <button class="btn" onclick="syncPush()">Subir cambios</button>
+          </div>
+
+          <div class="notice">
+            Puedes usar texto como: <b>3 de 20, 2 x 5, 4*100</b>. El sistema suma automáticamente y revisa si hay suficiente dinero antes de sacar de caja.
+          </div>
+
+          <h3 style="margin-top:18px">Selección actual</h3>
+          <div id="cashItems" class="items-list"></div>
+          <div class="notice ok"><b>Total selección:</b> <span id="cashSelectionTotal">L 0.00</span></div>
+        </div>
+
+        <div class="card">
+          <h3>Dinero actual por denominación</h3>
+          <div id="cashBalances" class="denom-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="bank" class="section">
+      <div class="grid">
+        <div class="card">
+          <div id="bankLockBox" class="locked">
+            <h4>🔐 Banco / Bolsas protegido</h4>
+            <p>Para entrar debes validar una licencia KeyAuth. La licencia se usa solo en esta sesión y no se guarda en navegador.</p>
+            <label>Licencia KeyAuth</label>
+            <input id="licenseInput" type="password" autocomplete="off" placeholder="Pega tu licencia" />
+            <div class="btns">
+              <button class="btn warn" onclick="verifyLicense()">Validar licencia</button>
+              <button class="btn secondary" onclick="lockBank()">Bloquear</button>
+            </div>
+            <div class="notice danger">Esta versión usa KeyAuth directo desde el navegador con un ID único local. No guarda la licencia, pero el ID del navegador sí se conserva para que la misma licencia no se use en otro móvil o PC si KeyAuth tiene HWID lock activo.</div>
+          </div>
+
+          <div id="bankPanel" class="hidden">
+            <div class="card-title">
+              <h3>Registrar movimiento de banco / bolsas</h3>
+              <button class="btn secondary small" onclick="clearCurrentItems()">Limpiar selección</button>
+            </div>
+
+            <div class="form-row">
+              <div>
+                <label>Tipo de movimiento</label>
+                <select id="bankAction">
+                  <option value="in">Agregar bolsa / entrada</option>
+                  <option value="out">Sacar bolsa / salida</option>
+                </select>
+              </div>
+              <div>
+                <label>Nota o motivo</label>
+                <input id="bankNote" placeholder="Ej: depósito, retiro, separación de efectivo..." />
+              </div>
+            </div>
+
+            <div class="form-row three">
+              <div>
+                <label>Bolsa disponible</label>
+                <select id="bankDenom"></select>
+              </div>
+              <div>
+                <label>Cantidad</label>
+                <input id="bankQty" type="number" min="1" step="1" placeholder="Ej: 1" />
+              </div>
+              <button class="btn secondary" onclick="addItemFromSelect('bank')">Agregar</button>
+            </div>
+
+            <label>Texto rápido para agregar o sacar bolsas</label>
+            <textarea id="bankText" placeholder="Ej: 1 de 1000, 2 de 5000, 1 de 20000"></textarea>
+            <div class="btns">
+              <button class="btn secondary" onclick="parseTextToItems('bank')">Interpretar texto</button>
+              <button class="btn success" onclick="registerMovement('bank')">Guardar movimiento</button>
+              <button class="btn dark" onclick="syncPull()">Cargar nube</button>
+              <button class="btn" onclick="syncPush()">Subir cambios</button>
+            </div>
+
+            <h3 style="margin-top:18px">Selección actual</h3>
+            <div id="bankItems" class="items-list"></div>
+            <div class="notice ok"><b>Total selección:</b> <span id="bankSelectionTotal">L 0.00</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Bolsas actuales</h3>
+          <div id="bankBalances" class="denom-grid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="history" class="section">
+      <div class="card">
+        <div class="card-title">
+          <h3>Historial de registros</h3>
+          <div class="btns" style="margin:0">
+            <button class="btn secondary small" onclick="exportBackup()">Exportar JSON</button>
+            <button class="btn dark small" onclick="syncPull()">Cargar nube</button>
+            <button class="btn small" onclick="syncPush()">Subir cambios</button>
+          </div>
+        </div>
+        <div id="historyList" class="history"></div>
+      </div>
+    </section>
+
+    <section id="settings" class="section">
+      <div class="card">
+        <h3>Configuración de sincronización</h3>
+        <p class="notice">Para GitHub Pages, este HTML guarda los datos en un archivo JSON del repo usando la API de GitHub. El token solo se queda guardado si activas “dispositivo de confianza”. Los datos de KeyAuth no se muestran aquí; se cambian dentro del archivo HTML.</p>
+        <div class="config-grid">
+          <div><label>GitHub owner</label><input id="cfgOwner" placeholder="CatalogosHN" /></div>
+          <div><label>Repositorio</label><input id="cfgRepo" placeholder="xcmbsdd" /></div>
+          <div><label>Rama</label><input id="cfgBranch" placeholder="main" /></div>
+          <div><label>Ruta archivo JSON</label><input id="cfgPath" placeholder="data/caja-cambios.json" /></div>
+          <div><label>ID navegador / HWID web</label><input id="cfgBrowserHwid" readonly /></div>
+          <div><label>Token GitHub</label><input id="cfgToken" type="password" placeholder="Pega tu token" /></div>
+        </div>
+        <label style="display:flex;align-items:center;gap:9px;font-weight:900;margin-top:14px">
+          <input id="cfgTrust" type="checkbox" style="width:auto" /> Guardar token en este dispositivo de confianza
+        </label>
+        <div class="btns">
+          <button class="btn success" onclick="saveConfig()">Guardar configuración</button>
+          <button class="btn dark" onclick="syncPull()">Probar / cargar nube</button>
+          <button class="btn" onclick="syncPush()">Subir datos a nube</button>
+          <button class="btn danger" onclick="forgetTrustedDevice()">Borrar token guardado</button>
+          <button class="btn secondary" onclick="copyBrowserHwid()">Copiar HWID web</button>
+          <button class="btn danger" onclick="resetBrowserHwid()">Generar nuevo HWID web</button>
+        </div>
+        <div class="notice danger">
+          Consejo: usa un token Fine-grained de GitHub con acceso solo a este repo y solo permiso de Contents lectura/escritura. Los datos de KeyAuth se cambian dentro del bloque CONFIGURACIÓN INTERNA KEYAUTH del archivo HTML. Activa HWID lock en tu licencia/app. Si generas un nuevo HWID web aquí, probablemente tendrás que resetear el HWID de ese usuario/licencia en KeyAuth.
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<dialog id="editDialog">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Editar registro</h3>
+      <button class="btn secondary small" onclick="closeEdit()">Cerrar</button>
+    </div>
+    <input id="editId" type="hidden" />
+    <div class="form-row">
+      <div>
+        <label>Tipo</label>
+        <select id="editAction">
+          <option value="in">Agregar dinero / bolsa</option>
+          <option value="out">Sacar dinero / bolsa</option>
+        </select>
+      </div>
+      <div>
+        <label>Área</label>
+        <input id="editArea" disabled />
+      </div>
+    </div>
+    <label>Detalle por texto</label>
+    <textarea id="editText" placeholder="Ej: 3 de 20, 2 de 5"></textarea>
+    <label>Nota</label>
+    <input id="editNote" placeholder="Motivo o comentario" />
+    <div class="notice">Al editar, se conserva la fecha original y se agrega fecha de edición. El sistema recalcula el dinero automáticamente.</div>
+    <div class="btns">
+      <button class="btn success" onclick="saveEdit()">Guardar edición</button>
+      <button class="btn secondary" onclick="closeEdit()">Cancelar</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+  const CASH_DENOMS = [1,2,5,10,20,50,100,200,500];
+  const BANK_DENOMS = [1000,2000,3000,5000,10000,20000];
+  const STORAGE_CONFIG = 'caja_cambios_config_v2';
+  const STORAGE_TOKEN = 'caja_cambios_trusted_token_v1';
+  const STORAGE_HWID = 'caja_cambios_browser_hwid_v1';
+
+  /************************************************************
+   * CONFIGURACIÓN INTERNA KEYAUTH
+   * Cambia estos datos directamente en el archivo.
+   * No se muestran en la pantalla de configuración.
+   ************************************************************/
+  const KEYAUTH_APP_NAME = 'AQUI_TU_APPLICATION_NAME';
+  const KEYAUTH_OWNER_ID = 'AQUI_TU_OWNER_ID';
+  const KEYAUTH_VERSION = '1.0';
+  const KEYAUTH_API_URL = 'https://keyauth.win/api/1.3/';
+
+  let currentTab = 'cash';
+  let bankUnlocked = false;
+  let githubSha = null;
+  let currentItems = { cash:{}, bank:{} };
+
+  let state = freshState();
+  let config = {
+    owner:'CatalogosHN',
+    repo:'xcmbsdd',
+    branch:'main',
+    path:'data/caja-cambios.json',
+    trusted:false,
+    token:''
+  };
+
+  function freshState(){
+    return {
+      schemaVersion: 1,
+      updatedAt: null,
+      cash: objectFromDenoms(CASH_DENOMS),
+      bank: objectFromDenoms(BANK_DENOMS),
+      logs: []
+    };
+  }
+  function objectFromDenoms(arr){
+    const obj = {};
+    arr.forEach(d => obj[d] = 0);
+    return obj;
+  }
+
+  function money(n){
+    return 'L ' + Number(n || 0).toLocaleString('es-HN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  }
+  function fmtDate(iso){
+    if(!iso) return '—';
+    return new Date(iso).toLocaleString('es-HN', {dateStyle:'short', timeStyle:'short'});
+  }
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+  function denoms(area){ return area === 'bank' ? BANK_DENOMS : CASH_DENOMS; }
+  function balanceObj(area){ return area === 'bank' ? state.bank : state.cash; }
+  function areaLabel(area){ return area === 'bank' ? 'Banco / Bolsas' : 'Caja de cambios'; }
+  function actionLabel(a, area){
+    if(area === 'cash') return a === 'in' ? 'Agregar dinero a caja' : 'Sacar dinero de caja';
+    if(area === 'bank') return a === 'in' ? 'Agregar bolsa al banco' : 'Sacar bolsa del banco';
+    return a === 'in' ? 'Agregar' : 'Sacar';
+  }
+
+  function randomIdPart(){
+    if(window.crypto && crypto.getRandomValues){
+      const arr = new Uint8Array(16);
+      crypto.getRandomValues(arr);
+      return Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+    return Math.random().toString(36).slice(2) + Date.now().toString(36);
+  }
+
+  function getBrowserHwid(){
+    let hwid = localStorage.getItem(STORAGE_HWID);
+    if(!hwid){
+      const base = [
+        'web',
+        randomIdPart(),
+        Date.now().toString(36)
+      ].join('-');
+      hwid = base.slice(0, 64);
+      localStorage.setItem(STORAGE_HWID, hwid);
+    }
+    return hwid;
+  }
+
+  async function copyBrowserHwid(){
+    const hwid = getBrowserHwid();
+    try{
+      await navigator.clipboard.writeText(hwid);
+      toast('HWID web copiado', 'ok');
+    }catch(e){
+      prompt('Copia este HWID web:', hwid);
+    }
+  }
+
+  function resetBrowserHwid(){
+    if(!confirm('Esto generará un nuevo HWID web. Si tu licencia ya quedó amarrada al HWID anterior, tendrás que resetearlo en KeyAuth. ¿Continuar?')) return;
+    localStorage.removeItem(STORAGE_HWID);
+    const hwid = getBrowserHwid();
+    document.getElementById('cfgBrowserHwid').value = hwid;
+    lockBank();
+    toast('Nuevo HWID web generado', 'warn');
+  }
+
+  function init(){
+    loadConfig();
+    fillSelects();
+    bindTabs();
+    renderAll();
+  }
+
+  function loadConfig(){
+    try{
+      const saved = JSON.parse(localStorage.getItem(STORAGE_CONFIG) || '{}');
+      config = {...config, ...saved};
+      if(config.trusted){
+        config.token = localStorage.getItem(STORAGE_TOKEN) || '';
+      }
+    }catch(e){}
+    document.getElementById('cfgOwner').value = config.owner || '';
+    document.getElementById('cfgRepo').value = config.repo || '';
+    document.getElementById('cfgBranch').value = config.branch || 'main';
+    document.getElementById('cfgPath').value = config.path || 'data/caja-cambios.json';
+    document.getElementById('cfgBrowserHwid').value = getBrowserHwid();
+    document.getElementById('cfgToken').value = config.token || '';
+    document.getElementById('cfgTrust').checked = !!config.trusted;
+  }
+
+  function normalizeApiUrl(url){
+    url = (url || 'https://keyauth.win/api/1.3/').trim();
+    if(!url.endsWith('/')) url += '/';
+    return url;
+  }
+
+  function saveConfig(){
+    config.owner = document.getElementById('cfgOwner').value.trim();
+    config.repo = document.getElementById('cfgRepo').value.trim();
+    config.branch = document.getElementById('cfgBranch').value.trim() || 'main';
+    config.path = document.getElementById('cfgPath').value.trim() || 'data/caja-cambios.json';
+    config.token = document.getElementById('cfgToken').value.trim();
+    config.trusted = document.getElementById('cfgTrust').checked;
+
+    const safeConfig = {...config, token:''};
+    localStorage.setItem(STORAGE_CONFIG, JSON.stringify(safeConfig));
+    if(config.trusted && config.token){
+      localStorage.setItem(STORAGE_TOKEN, config.token);
+    }else{
+      localStorage.removeItem(STORAGE_TOKEN);
+    }
+    toast('Configuración guardada', 'ok');
+    updateSyncStatus();
+  }
+
+  function forgetTrustedDevice(){
+    localStorage.removeItem(STORAGE_TOKEN);
+    config.token = '';
+    config.trusted = false;
+    document.getElementById('cfgToken').value = '';
+    document.getElementById('cfgTrust').checked = false;
+    const safeConfig = {...config, token:''};
+    localStorage.setItem(STORAGE_CONFIG, JSON.stringify(safeConfig));
+    toast('Token borrado de este dispositivo', 'warn');
+    updateSyncStatus();
+  }
+
+  function fillSelects(){
+    const cash = document.getElementById('cashDenom');
+    cash.innerHTML = CASH_DENOMS.map(d => `<option value="${d}">${d === 1 ? '1 lempira' : d + ' lempiras'}</option>`).join('');
+    const bank = document.getElementById('bankDenom');
+    bank.innerHTML = BANK_DENOMS.map(d => `<option value="${d}">Bolsa de ${money(d)}</option>`).join('');
+  }
+
+  function bindTabs(){
+    document.querySelectorAll('[data-tab]').forEach(btn => {
+      btn.addEventListener('click', () => showTab(btn.dataset.tab));
+    });
+  }
+
+  function showTab(tab){
+    currentTab = tab;
+    document.querySelectorAll('[data-tab]').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    document.querySelectorAll('.section').forEach(s => s.classList.toggle('active', s.id === tab));
+    const titles = {
+      cash:['Caja de cambios', 'Agregar dinero a caja de cambios o sacar dinero de caja por denominación.'],
+      bank:['Banco / Bolsas', 'Bolsas de L 1,000 hasta L 20,000 protegidas por licencia.'],
+      history:['Historial', 'Registros con fecha de creación, movimiento de caja/banco y edición.'],
+      settings:['Configuración', 'Token GitHub y archivo JSON. KeyAuth va fijo dentro del HTML.']
+    };
+    document.getElementById('pageTitle').textContent = titles[tab][0];
+    document.getElementById('pageSubtitle').textContent = titles[tab][1];
+  }
+
+  function addItemFromSelect(area){
+    const d = Number(document.getElementById(area + 'Denom').value);
+    const q = Number(document.getElementById(area + 'Qty').value);
+    if(!q || q < 1) return toast('Ingresa una cantidad válida', 'bad');
+    currentItems[area][d] = (currentItems[area][d] || 0) + Math.floor(q);
+    document.getElementById(area + 'Qty').value = '';
+    renderItems(area);
+  }
+
+  function parseTextToItems(area){
+    const text = document.getElementById(area + 'Text').value.trim();
+    if(!text) return toast('Escribe algo para interpretar', 'bad');
+    const parsed = parseMoneyText(text, denoms(area));
+    if(!Object.keys(parsed).length) return toast('No pude detectar cantidades válidas', 'bad');
+    Object.entries(parsed).forEach(([d,q]) => {
+      currentItems[area][d] = (currentItems[area][d] || 0) + q;
+    });
+    document.getElementById(area + 'Text').value = '';
+    renderItems(area);
+    toast('Texto interpretado correctamente', 'ok');
+  }
+
+  function parseMoneyText(text, allowed){
+    const allowedSet = new Set(allowed.map(Number));
+    const clean = text.toLowerCase()
+      .replace(/lempiras?/g,'')
+      .replace(/billetes?/g,'')
+      .replace(/bolsas?/g,'')
+      .replace(/,/g,' , ');
+    const result = {};
+    const regex = /(\d+)\s*(?:de|x|\*|por|-)?\s*(\d{1,6})/g;
+    let m;
+    while((m = regex.exec(clean)) !== null){
+      const qty = Number(m[1]);
+      const denom = Number(m[2]);
+      if(qty > 0 && allowedSet.has(denom)){
+        result[denom] = (result[denom] || 0) + qty;
+      }
+    }
+    return result;
+  }
+
+  function removeItem(area, denom){
+    delete currentItems[area][denom];
+    renderItems(area);
+  }
+
+  function clearCurrentItems(){
+    currentItems[currentTab === 'bank' ? 'bank' : 'cash'] = {};
+    renderItems('cash');
+    renderItems('bank');
+  }
+
+  function itemsTotal(items){
+    return Object.entries(items || {}).reduce((sum,[d,q]) => sum + Number(d)*Number(q), 0);
+  }
+
+  function itemsDescription(items, area){
+    return Object.entries(items || {})
+      .filter(([,q]) => Number(q) > 0)
+      .sort((a,b) => Number(a[0]) - Number(b[0]))
+      .map(([d,q]) => area === 'bank' ? `${q} x bolsa de ${money(d)}` : `${q} x ${d} lempiras`)
+      .join(', ');
+  }
+
+  function registerMovement(area){
+    if(area === 'bank' && !bankUnlocked) return toast('Primero valida la licencia KeyAuth', 'bad');
+    const action = document.getElementById(area + 'Action').value;
+    const note = document.getElementById(area + 'Note').value.trim();
+    const items = cleanItems(currentItems[area]);
+    if(!Object.keys(items).length) return toast('Agrega al menos una denominación', 'bad');
+    if(!canApply(area, action, items, state)) return toast(area === 'cash' ? 'No hay suficiente dinero en caja para sacar' : 'No hay suficientes bolsas para sacar', 'bad');
+
+    const log = {
+      id: uid(), area, action, items, note,
+      total: itemsTotal(items),
+      createdAt: new Date().toISOString(),
+      editedAt: null,
+      edits: []
+    };
+    applyEffect(state, log, +1);
+    state.logs.unshift(log);
+    state.updatedAt = new Date().toISOString();
+    currentItems[area] = {};
+    document.getElementById(area + 'Note').value = '';
+    renderAll();
+    toast('Movimiento guardado', 'ok');
+  }
+
+  function cleanItems(items){
+    const out = {};
+    Object.entries(items || {}).forEach(([d,q]) => {
+      d = Number(d); q = Math.floor(Number(q));
+      if(q > 0) out[d] = q;
+    });
+    return out;
+  }
+
+  function canApply(area, action, items, targetState){
+    if(action === 'in') return true;
+    const bal = area === 'bank' ? targetState.bank : targetState.cash;
+    return Object.entries(items).every(([d,q]) => Number(bal[d] || 0) >= Number(q));
+  }
+
+  function applyEffect(targetState, log, direction){
+    const bal = log.area === 'bank' ? targetState.bank : targetState.cash;
+    Object.entries(log.items || {}).forEach(([d,q]) => {
+      const sign = log.action === 'in' ? 1 : -1;
+      bal[d] = Number(bal[d] || 0) + (sign * Number(q) * direction);
+      if(Math.abs(bal[d]) < 0.0001) bal[d] = 0;
+    });
+  }
+
+  function openEdit(id){
+    const log = state.logs.find(l => l.id === id);
+    if(!log) return;
+    if(log.area === 'bank' && !bankUnlocked) return toast('Valida licencia para editar Banco / Bolsas', 'bad');
+    document.getElementById('editId').value = id;
+    const editAction = document.getElementById('editAction');
+    editAction.innerHTML = log.area === 'cash'
+      ? '<option value="in">Agregar dinero a caja de cambios</option><option value="out">Sacar dinero de caja</option>'
+      : '<option value="in">Agregar bolsa al banco</option><option value="out">Sacar bolsa del banco</option>';
+    editAction.value = log.action;
+    document.getElementById('editArea').value = areaLabel(log.area);
+    document.getElementById('editText').value = itemsDescription(log.items, log.area).replaceAll(' x ', ' de ').replaceAll('bolsa de L ', '').replaceAll(',', ', ');
+    document.getElementById('editNote').value = log.note || '';
+    document.getElementById('editDialog').showModal();
+  }
+
+  function closeEdit(){ document.getElementById('editDialog').close(); }
+
+  function saveEdit(){
+    const id = document.getElementById('editId').value;
+    const logIndex = state.logs.findIndex(l => l.id === id);
+    if(logIndex < 0) return;
+    const old = state.logs[logIndex];
+    const newAction = document.getElementById('editAction').value;
+    const newNote = document.getElementById('editNote').value.trim();
+    const newItems = parseMoneyText(document.getElementById('editText').value, denoms(old.area));
+    if(!Object.keys(newItems).length) return toast('No detecté denominaciones válidas para editar', 'bad');
+
+    const temp = structuredClone(state);
+    applyEffect(temp, old, -1);
+    if(!canApply(old.area, newAction, newItems, temp)) return toast('La edición dejaría saldo negativo', 'bad');
+
+    const previous = {
+      action: old.action,
+      items: structuredClone(old.items),
+      note: old.note,
+      total: old.total,
+      editedFromAt: old.editedAt || null
+    };
+
+    applyEffect(state, old, -1);
+    const edited = {
+      ...old,
+      action: newAction,
+      items: cleanItems(newItems),
+      note: newNote,
+      total: itemsTotal(newItems),
+      editedAt: new Date().toISOString(),
+      edits: [...(old.edits || []), {at:new Date().toISOString(), previous}]
+    };
+    applyEffect(state, edited, +1);
+    state.logs[logIndex] = edited;
+    state.updatedAt = new Date().toISOString();
+    closeEdit();
+    renderAll();
+    toast('Registro editado y marcado como editado', 'ok');
+  }
+
+  function deleteLog(id){
+    const logIndex = state.logs.findIndex(l => l.id === id);
+    if(logIndex < 0) return;
+    const log = state.logs[logIndex];
+    if(log.area === 'bank' && !bankUnlocked) return toast('Valida licencia para eliminar registro de Banco / Bolsas', 'bad');
+    if(!confirm('¿Eliminar este registro y revertir su movimiento?')) return;
+    applyEffect(state, log, -1);
+    state.logs.splice(logIndex, 1);
+    state.updatedAt = new Date().toISOString();
+    renderAll();
+    toast('Registro eliminado y saldo revertido', 'warn');
+  }
+
+  function buildKeyauthUrl(params){
+    const url = new URL(normalizeApiUrl(KEYAUTH_API_URL || 'https://keyauth.win/api/1.3/'));
+    Object.entries(params).forEach(([k,v]) => url.searchParams.set(k, v == null ? '' : String(v)));
+    return url.toString();
+  }
+
+  async function fetchKeyauth(params){
+    const res = await fetch(buildKeyauthUrl(params), { method:'GET', cache:'no-store' });
+    const data = await res.json().catch(() => ({}));
+    if(!res.ok) throw new Error(data.message || 'KeyAuth respondió ' + res.status);
+    return data;
+  }
+
+  async function verifyLicense(){
+    const license = document.getElementById('licenseInput').value.trim();
+    if(!license) return toast('Pega una licencia KeyAuth', 'bad');
+    saveConfig();
+    if(!KEYAUTH_APP_NAME || !KEYAUTH_OWNER_ID || !KEYAUTH_VERSION || KEYAUTH_APP_NAME.includes('AQUI_') || KEYAUTH_OWNER_ID.includes('AQUI_')){
+      return toast('Falta cambiar los datos internos de KeyAuth dentro del archivo HTML', 'bad');
+    }
+
+    const hwid = getBrowserHwid();
+    try{
+      toast('Validando KeyAuth...', 'warn');
+      const initData = await fetchKeyauth({
+        type:'init',
+        ver:1.0,
+        name:cambioscaja,
+        ownerid:RZsbvRZczd,
+        hash:'undefined',
+        token:'undefined',
+        thash:'undefined'
+      });
+      if(!initData.success || !initData.sessionid){
+        bankUnlocked = false;
+        renderBankLock();
+        return toast(initData.message || 'No se pudo inicializar KeyAuth', 'bad');
+      }
+
+      const loginData = await fetchKeyauth({
+        type:'license',
+        key:license,
+        sessionid:initData.sessionid,
+        name:KEYAUTH_APP_NAME,
+        ownerid:KEYAUTH_OWNER_ID,
+        hwid:hwid,
+        code:''
+      });
+
+      if(!loginData.success){
+        bankUnlocked = false;
+        renderBankLock();
+        return toast(loginData.message || 'Licencia no autorizada para este dispositivo', 'bad');
+      }
+
+      bankUnlocked = true;
+      document.getElementById('licenseInput').value = '';
+      renderBankLock();
+      toast('Banco / Bolsas desbloqueado para este navegador', 'ok');
+    }catch(e){
+      bankUnlocked = false;
+      renderBankLock();
+      toast('No se pudo validar KeyAuth: ' + e.message + '. Si aparece Failed to fetch, el navegador bloqueó la API por CORS.', 'bad');
+    }
+  }
+
+  function lockBank(){
+    bankUnlocked = false;
+    document.getElementById('licenseInput').value = '';
+    renderBankLock();
+    toast('Banco / Bolsas bloqueado', 'warn');
+  }
+
+  function renderBankLock(){
+    document.getElementById('bankLockBox').classList.toggle('hidden', bankUnlocked);
+    document.getElementById('bankPanel').classList.toggle('hidden', !bankUnlocked);
+    document.getElementById('keyDot').className = 'dot ' + (bankUnlocked ? 'ok' : 'bad');
+    document.getElementById('keyText').textContent = bankUnlocked ? 'Banco desbloqueado' : 'Banco bloqueado';
+  }
+
+  function renderAll(){
+    normalizeState();
+    renderBalances('cash');
+    renderBalances('bank');
+    renderItems('cash');
+    renderItems('bank');
+    renderHistory();
+    renderTotals();
+    renderBankLock();
+    updateSyncStatus();
+  }
+
+  function normalizeState(){
+    state.cash = {...objectFromDenoms(CASH_DENOMS), ...(state.cash || {})};
+    state.bank = {...objectFromDenoms(BANK_DENOMS), ...(state.bank || {})};
+    state.logs = Array.isArray(state.logs) ? state.logs : [];
+  }
+
+  function renderBalances(area){
+    const el = document.getElementById(area + 'Balances');
+    const bal = balanceObj(area);
+    el.innerHTML = denoms(area).map(d => `
+      <div class="denom">
+        <b>${area === 'bank' ? 'Bolsa ' : ''}${money(d)}</b>
+        <span>Cantidad: ${Number(bal[d] || 0)}</span>
+        <span>Total: ${money(Number(d) * Number(bal[d] || 0))}</span>
+      </div>
+    `).join('');
+  }
+
+  function renderItems(area){
+    const el = document.getElementById(area + 'Items');
+    const items = currentItems[area] || {};
+    const keys = Object.keys(items).filter(k => items[k] > 0).sort((a,b)=>Number(a)-Number(b));
+    if(!keys.length){
+      el.innerHTML = '<div class="notice">Sin denominaciones agregadas todavía.</div>';
+    }else{
+      el.innerHTML = keys.map(d => `
+        <div class="item-row">
+          <div><b>${area === 'bank' ? 'Bolsa de ' : ''}${money(d)}</b><br><small>${money(d * items[d])}</small></div>
+          <input type="number" min="1" step="1" value="${items[d]}" onchange="updateCurrentQty('${area}', '${d}', this.value)" />
+          <button onclick="removeItem('${area}', '${d}')">×</button>
+        </div>
+      `).join('');
+    }
+    document.getElementById(area + 'SelectionTotal').textContent = money(itemsTotal(items));
+  }
+
+  function updateCurrentQty(area, denom, value){
+    const q = Math.floor(Number(value));
+    if(q > 0) currentItems[area][denom] = q;
+    else delete currentItems[area][denom];
+    renderItems(area);
+  }
+
+  function renderHistory(){
+    const el = document.getElementById('historyList');
+    if(!state.logs.length){
+      el.innerHTML = '<div class="notice">Aún no hay registros.</div>';
+      return;
+    }
+    el.innerHTML = state.logs.map(log => `
+      <div class="log">
+        <div class="log-head">
+          <div>
+            <div class="log-title">${areaLabel(log.area)} · ${actionLabel(log.action, log.area)} · ${money(log.total)}</div>
+            <div class="log-meta">
+              Fecha de registro: ${fmtDate(log.createdAt)}<br>
+              ${log.editedAt ? `Fecha editada: ${fmtDate(log.editedAt)} · Veces editado: ${(log.edits || []).length}` : 'Sin edición'}
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+            <span class="tag ${log.action === 'in' ? 'in' : 'out'}">${actionLabel(log.action, log.area)}</span>
+            ${log.editedAt ? '<span class="tag edit">Editado</span>' : ''}
+          </div>
+        </div>
+        <div class="log-detail"><b>Detalle:</b> ${itemsDescription(log.items, log.area)}</div>
+        ${log.note ? `<div class="log-detail"><b>Nota:</b> ${escapeHtml(log.note)}</div>` : ''}
+        <div class="log-actions">
+          <button class="btn secondary small" onclick="openEdit('${log.id}')">Editar</button>
+          <button class="btn danger small" onclick="deleteLog('${log.id}')">Eliminar / revertir</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderTotals(){
+    const cashTotal = totalArea('cash');
+    const bankTotal = totalArea('bank');
+    const grand = cashTotal + bankTotal;
+    document.getElementById('cashTotal').textContent = money(cashTotal);
+    document.getElementById('bankTotal').textContent = money(bankTotal);
+    document.getElementById('grandTotal').textContent = money(grand);
+    document.getElementById('sideCash').textContent = money(cashTotal);
+    document.getElementById('sideBank').textContent = money(bankTotal);
+    document.getElementById('sideGrand').textContent = money(grand);
+  }
+
+  function totalArea(area){
+    const bal = balanceObj(area);
+    return Object.entries(bal).reduce((sum,[d,q]) => sum + Number(d)*Number(q || 0), 0);
+  }
+
+  function updateSyncStatus(){
+    const ok = !!(config.owner && config.repo && config.path && (config.token || document.getElementById('cfgToken')?.value));
+    document.getElementById('syncDot').className = 'dot ' + (ok ? 'ok' : '');
+    document.getElementById('syncText').textContent = ok ? 'Listo para sincronizar' : 'Configura token/repo';
+  }
+
+  function escapeHtml(str){
+    return String(str).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));
+  }
+
+  function requireConfig(){
+    saveConfig();
+    if(!config.owner || !config.repo || !config.path || !config.token){
+      showTab('settings');
+      toast('Completa owner, repo, ruta y token', 'bad');
+      return false;
+    }
+    return true;
+  }
+
+  function githubUrl(){
+    const path = config.path.split('/').map(encodeURIComponent).join('/');
+    return `https://api.github.com/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/contents/${path}`;
+  }
+
+  function b64EncodeUnicode(str){
+    return btoa(unescape(encodeURIComponent(str)));
+  }
+  function b64DecodeUnicode(str){
+    return decodeURIComponent(escape(atob(str.replace(/\n/g,''))));
+  }
+
+  async function syncPull(){
+    if(!requireConfig()) return;
+    try{
+      const res = await fetch(`${githubUrl()}?ref=${encodeURIComponent(config.branch)}`, {
+        headers:{
+          'Authorization': `Bearer ${config.token}`,
+          'Accept':'application/vnd.github+json',
+          'X-GitHub-Api-Version':'2022-11-28'
+        }
+      });
+      if(res.status === 404){
+        githubSha = null;
+        toast('Archivo no existe todavía. Se creará al subir cambios.', 'warn');
+        return;
+      }
+      if(!res.ok) throw new Error('GitHub respondió ' + res.status);
+      const data = await res.json();
+      githubSha = data.sha;
+      const content = b64DecodeUnicode(data.content || '');
+      const loaded = JSON.parse(content || '{}');
+      state = {...freshState(), ...loaded};
+      normalizeState();
+      renderAll();
+      toast('Datos cargados desde GitHub', 'ok');
+    }catch(e){
+      toast('Error cargando nube: ' + e.message, 'bad');
+    }
+  }
+
+  async function syncPush(){
+    if(!requireConfig()) return;
+    try{
+      state.updatedAt = new Date().toISOString();
+      const body = {
+        message: `Actualiza caja de cambios ${new Date().toLocaleString('es-HN')}`,
+        content: b64EncodeUnicode(JSON.stringify(state, null, 2)),
+        branch: config.branch
+      };
+      if(githubSha) body.sha = githubSha;
+      const res = await fetch(githubUrl(), {
+        method:'PUT',
+        headers:{
+          'Authorization': `Bearer ${config.token}`,
+          'Accept':'application/vnd.github+json',
+          'Content-Type':'application/json',
+          'X-GitHub-Api-Version':'2022-11-28'
+        },
+        body: JSON.stringify(body)
+      });
+      if(!res.ok){
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'GitHub respondió ' + res.status);
+      }
+      const data = await res.json();
+      githubSha = data.content?.sha || githubSha;
+      renderAll();
+      toast('Cambios subidos a GitHub', 'ok');
+    }catch(e){
+      toast('Error subiendo cambios: ' + e.message, 'bad');
+    }
+  }
+
+  function exportBackup(){
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'backup-caja-cambios.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function toast(msg, type=''){
+    const wrap = document.getElementById('toasts');
+    const div = document.createElement('div');
+    div.className = 'toast ' + type;
+    div.textContent = msg;
+    wrap.appendChild(div);
+    setTimeout(() => div.remove(), 4300);
+  }
+
+  window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
