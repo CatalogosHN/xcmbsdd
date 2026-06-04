@@ -318,6 +318,33 @@
     }
     .toast.ok{background:#166534}.toast.bad{background:#991b1b}.toast.warn{background:#92400e}
 
+
+
+    .bottom-sync{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:14px;
+      z-index:90;
+      width:min(920px,calc(100vw - 28px));
+      background:rgba(255,255,255,.94);
+      backdrop-filter:blur(16px);
+      border:1px solid var(--border);
+      border-radius:22px;
+      box-shadow:0 18px 55px rgba(15,41,77,.18);
+      padding:12px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .bottom-sync .sync-info{display:flex;flex-direction:column;gap:2px;min-width:230px}
+    .bottom-sync .sync-info b{font-size:14px}
+    .bottom-sync .sync-info span{font-size:12px;color:var(--muted);font-weight:800}
+    .bottom-sync .sync-actions{display:flex;gap:10px;flex-wrap:wrap}
+    main{padding-bottom:105px}
+
     @media(max-width:980px){
       .app{grid-template-columns:1fr}
       aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--border)}
@@ -367,7 +394,7 @@
         <p id="pageSubtitle">Control de dinero agregado y dinero sacado por denominación.</p>
       </div>
       <div class="status-row">
-        <span class="pill"><span class="dot" id="syncDot"></span><span id="syncText">Autosubida pendiente de configuración</span></span>
+        <span class="pill"><span class="dot" id="syncDot"></span><span id="syncText">Primero carga nube</span></span>
         <span class="pill"><span class="dot bad" id="keyDot"></span><span id="keyText">Banco bloqueado</span></span>
       </div>
     </div>
@@ -417,11 +444,10 @@
           <div class="btns">
             <button class="btn secondary" onclick="parseTextToItems('cash')">Interpretar texto</button>
             <button class="btn success" onclick="registerMovement('cash')">Guardar movimiento de caja</button>
-            <button class="btn dark" onclick="syncPull()">Cargar nube</button>
-          </div>
+            </div>
 
           <div class="notice">
-            Puedes usar texto como: <b>3 de 20, 2 x 5, 4*100</b>. El sistema suma automáticamente y revisa si hay suficiente dinero antes de sacar de caja. Al guardar, se sube solo a GitHub 1 segundo después.
+            Puedes usar texto como: <b>3 de 20, 2 x 5, 4*100</b>. El sistema suma automáticamente y revisa si hay suficiente dinero antes de sacar de caja. Al guardar, se guarda automáticamente en este navegador. Cuando termines, usa el botón de abajo: Subir cambios.
           </div>
 
           <h3 style="margin-top:18px">Selección actual</h3>
@@ -488,9 +514,8 @@
             <div class="btns">
               <button class="btn secondary" onclick="parseTextToItems('bank')">Interpretar texto</button>
               <button class="btn success" onclick="registerMovement('bank')">Guardar movimiento</button>
-              <button class="btn dark" onclick="syncPull()">Cargar nube</button>
               </div>
-            <div class="notice">Al guardar una entrada o salida de bolsas, el cambio se sube solo a GitHub 1 segundo después.</div>
+            <div class="notice">Al guardar una entrada o salida de bolsas, el cambio se guarda automáticamente en este navegador. Cuando termines, usa el botón de abajo: Subir cambios.</div>
 
             <h3 style="margin-top:18px">Selección actual</h3>
             <div id="bankItems" class="items-list"></div>
@@ -511,7 +536,6 @@
           <h3>Historial de registros</h3>
           <div class="btns" style="margin:0">
             <button class="btn secondary small" onclick="exportBackup()">Exportar JSON</button>
-            <button class="btn dark small" onclick="syncPull()">Cargar nube</button>
           </div>
         </div>
         <div id="historyList" class="history"></div>
@@ -521,7 +545,7 @@
     <section id="settings" class="section">
       <div class="card">
         <h3>Configuración de sincronización</h3>
-        <p class="notice">Para GitHub Pages, este HTML guarda los datos en un archivo JSON del repo usando la API de GitHub. El token solo se queda guardado si activas “dispositivo de confianza”. Los datos de KeyAuth no se muestran aquí; se cambian dentro del archivo HTML.</p>
+        <p class="notice">Para GitHub Pages, este HTML carga los datos desde GitHub, luego guarda automáticamente una copia local en este navegador para que no se pierdan los cambios si actualizas la página. Al terminar, usa “Subir cambios” en la barra inferior. El token solo se queda guardado si activas “dispositivo de confianza”. Los datos de KeyAuth no se muestran aquí; se cambian dentro del archivo HTML.</p>
         <div class="config-grid">
           <div><label>GitHub owner</label><input id="cfgOwner" placeholder="CatalogosHN" /></div>
           <div><label>Repositorio</label><input id="cfgRepo" placeholder="xcmbsdd" /></div>
@@ -535,7 +559,6 @@
         </label>
         <div class="btns">
           <button class="btn success" onclick="saveConfig()">Guardar configuración</button>
-          <button class="btn dark" onclick="syncPull()">Probar / cargar nube</button>
           <button class="btn danger" onclick="forgetTrustedDevice()">Borrar token guardado</button>
           <button class="btn secondary" onclick="copyBrowserHwid()">Copiar HWID web</button>
           <button class="btn danger" onclick="resetBrowserHwid()">Generar nuevo HWID web</button>
@@ -580,6 +603,19 @@
   </div>
 </dialog>
 
+
+
+<div class="bottom-sync">
+  <div class="sync-info">
+    <b>Sincronización segura</b>
+    <span id="bottomSyncText">Primero carga nube antes de registrar movimientos.</span>
+  </div>
+  <div class="sync-actions">
+    <button class="btn dark" onclick="syncPull()">Cargar nube</button>
+    <button class="btn success" onclick="syncPush(false)">Subir cambios</button>
+  </div>
+</div>
+
 <div class="toast-wrap" id="toasts"></div>
 
 <script>
@@ -588,6 +624,8 @@
   const STORAGE_CONFIG = 'caja_cambios_config_v2';
   const STORAGE_TOKEN = 'caja_cambios_trusted_token_v1';
   const STORAGE_HWID = 'caja_cambios_browser_hwid_v1';
+  const STORAGE_LOCAL_STATE = 'caja_cambios_local_state_v1';
+  const STORAGE_LOCAL_META = 'caja_cambios_local_meta_v1';
 
   /************************************************************
    * CONFIGURACIÓN INTERNA KEYAUTH
@@ -605,24 +643,75 @@
   let currentItems = { cash:{}, bank:{} };
   let autoSyncTimer = null;
   let keyauthSessionId = null;
+  let cloudLoaded = false;
+  let localSaveEnabled = false;
+  let dirtyLocal = false;
+  let cloudLoadedAt = null;
 
-  function canUseGithubSilently(){
-    saveConfig();
+  function hasGithubConfig(){
     return !!(config.owner && config.repo && config.path && config.token);
+  }
+
+  function ensureCloudLoadedForWrite(){
+    if(!cloudLoaded && !localSaveEnabled){
+      toast('Primero presiona Cargar nube. Así no trabajas sobre datos vacíos o atrasados.', 'bad');
+      updateSyncStatus();
+      return false;
+    }
+    return true;
+  }
+
+  function saveLocalSnapshot(isDirty=true){
+    if(!localSaveEnabled) return;
+    try{
+      const meta = {
+        savedAt:new Date().toISOString(),
+        dirty:!!isDirty,
+        githubSha:githubSha || null,
+        cloudLoadedAt:cloudLoadedAt || null
+      };
+      localStorage.setItem(STORAGE_LOCAL_STATE, JSON.stringify(state));
+      localStorage.setItem(STORAGE_LOCAL_META, JSON.stringify(meta));
+      dirtyLocal = !!isDirty;
+      updateSyncStatus();
+    }catch(e){
+      toast('No se pudo guardar en este navegador: ' + e.message, 'bad');
+    }
+  }
+
+  function loadLocalSnapshot(){
+    try{
+      const raw = localStorage.getItem(STORAGE_LOCAL_STATE);
+      if(!raw) return false;
+      const saved = JSON.parse(raw);
+      if(!saved || typeof saved !== 'object') return false;
+      const meta = JSON.parse(localStorage.getItem(STORAGE_LOCAL_META) || '{}');
+      state = {...freshState(), ...saved};
+      githubSha = meta.githubSha || null;
+      dirtyLocal = !!meta.dirty;
+      cloudLoadedAt = meta.cloudLoadedAt || null;
+      cloudLoaded = true;
+      localSaveEnabled = true;
+      setTimeout(() => toast(dirtyLocal ? 'Recuperé cambios guardados en este navegador. Revisa y luego sube cambios.' : 'Recuperé la última copia local del navegador.', dirtyLocal ? 'warn' : 'ok'), 500);
+      return true;
+    }catch(e){
+      console.warn('No se pudo cargar copia local', e);
+      return false;
+    }
   }
 
   function scheduleAutoSync(reason='Cambio guardado'){
     clearTimeout(autoSyncTimer);
-    if(!canUseGithubSilently()){
-      toast(reason + ' localmente. Configura GitHub para autosubida.', 'warn');
+    if(!localSaveEnabled){
+      toast(reason + ', pero primero debes cargar nube para activar guardado local seguro.', 'bad');
       updateSyncStatus();
       return;
     }
-    document.getElementById('syncText').textContent = 'Autosubida en 1 segundo...';
-    autoSyncTimer = setTimeout(async () => {
-      document.getElementById('syncText').textContent = 'Subiendo a GitHub...';
-      await syncPush(true);
-    }, 1000);
+    document.getElementById('syncText').textContent = 'Guardando en navegador...';
+    autoSyncTimer = setTimeout(() => {
+      saveLocalSnapshot(true);
+      toast(reason + ' en navegador. Al terminar usa Subir cambios.', 'ok');
+    }, 350);
   }
 
   let state = freshState();
@@ -711,6 +800,7 @@
 
   function init(){
     loadConfig();
+    loadLocalSnapshot();
     fillSelects();
     bindTabs();
     renderAll();
@@ -863,6 +953,7 @@
   }
 
   function registerMovement(area){
+    if(!ensureCloudLoadedForWrite()) return;
     if(area === 'bank' && !bankUnlocked) return toast('Primero valida la licencia KeyAuth', 'bad');
     const action = document.getElementById(area + 'Action').value;
     const note = document.getElementById(area + 'Note').value.trim();
@@ -929,6 +1020,7 @@
   function closeEdit(){ document.getElementById('editDialog').close(); }
 
   function saveEdit(){
+    if(!ensureCloudLoadedForWrite()) return;
     const id = document.getElementById('editId').value;
     const logIndex = state.logs.findIndex(l => l.id === id);
     if(logIndex < 0) return;
@@ -969,6 +1061,7 @@
   }
 
   function deleteLog(id){
+    if(!ensureCloudLoadedForWrite()) return;
     const logIndex = state.logs.findIndex(l => l.id === id);
     if(logIndex < 0) return;
     const log = state.logs[logIndex];
@@ -1012,9 +1105,9 @@
           ver:KEYAUTH_VERSION,
           name:KEYAUTH_APP_NAME,
           ownerid:KEYAUTH_OWNER_ID,
-          hash:'undefined',
-          token:'undefined',
-          thash:'undefined'
+          hash:'',
+          token:'',
+          thash:''
         });
 
         if(!initData.success || !initData.sessionid){
@@ -1173,9 +1266,28 @@
   }
 
   function updateSyncStatus(){
-    const ok = !!(config.owner && config.repo && config.path && (config.token || document.getElementById('cfgToken')?.value));
-    document.getElementById('syncDot').className = 'dot ' + (ok ? 'ok' : '');
-    document.getElementById('syncText').textContent = ok ? 'Listo para sincronizar' : 'Configura token/repo';
+    const tokenField = document.getElementById('cfgToken');
+    const ok = !!(config.owner && config.repo && config.path && (config.token || tokenField?.value));
+    let text = 'Configura token/repo';
+    let dotClass = 'dot';
+    if(ok && !cloudLoaded){
+      text = 'Primero carga nube';
+    }else if(ok && dirtyLocal){
+      text = 'Cambios guardados en navegador';
+      dotClass = 'dot ok';
+    }else if(ok && cloudLoaded){
+      text = 'Nube cargada / sin cambios pendientes';
+      dotClass = 'dot ok';
+    }
+    document.getElementById('syncDot').className = dotClass;
+    document.getElementById('syncText').textContent = text;
+    const bottom = document.getElementById('bottomSyncText');
+    if(bottom){
+      if(!ok) bottom.textContent = 'Configura GitHub en Ajustes para poder cargar y subir.';
+      else if(!cloudLoaded) bottom.textContent = 'Primero presiona Cargar nube. Después ya puedes registrar movimientos.';
+      else if(dirtyLocal) bottom.textContent = 'Hay cambios guardados en este navegador. Presiona Subir cambios al terminar.';
+      else bottom.textContent = 'Datos cargados. Puedes trabajar o volver a cargar nube.';
+    }
   }
 
   function escapeHtml(str){
@@ -1206,6 +1318,7 @@
 
   async function syncPull(){
     if(!requireConfig()) return;
+    if(dirtyLocal && !confirm('Hay cambios guardados en este navegador que todavía no se han subido. Si cargas nube ahora, puedes reemplazarlos. ¿Continuar?')) return;
     try{
       const res = await fetch(`${githubUrl()}?ref=${encodeURIComponent(config.branch)}`, {
         headers:{
@@ -1216,7 +1329,14 @@
       });
       if(res.status === 404){
         githubSha = null;
-        toast('Archivo no existe todavía. Se creará al subir cambios.', 'warn');
+        state = freshState();
+        normalizeState();
+        cloudLoaded = true;
+        localSaveEnabled = true;
+        cloudLoadedAt = new Date().toISOString();
+        saveLocalSnapshot(false);
+        renderAll();
+        toast('Archivo no existe todavía. Se inició una caja vacía y se creará al subir cambios.', 'warn');
         return;
       }
       if(!res.ok) throw new Error('GitHub respondió ' + res.status);
@@ -1226,8 +1346,12 @@
       const loaded = JSON.parse(content || '{}');
       state = {...freshState(), ...loaded};
       normalizeState();
+      cloudLoaded = true;
+      localSaveEnabled = true;
+      cloudLoadedAt = new Date().toISOString();
+      saveLocalSnapshot(false);
       renderAll();
-      toast('Datos cargados desde GitHub', 'ok');
+      toast('Datos cargados desde GitHub. Guardado local activado.', 'ok');
     }catch(e){
       toast('Error cargando nube: ' + e.message, 'bad');
     }
@@ -1235,6 +1359,9 @@
 
   async function syncPush(auto=false){
     if(!requireConfig()) return;
+    if(!cloudLoaded && !localSaveEnabled){
+      return toast('Primero carga nube antes de subir cambios, para no sobrescribir datos por accidente.', 'bad');
+    }
     try{
       state.updatedAt = new Date().toISOString();
       const body = {
@@ -1259,8 +1386,9 @@
       }
       const data = await res.json();
       githubSha = data.content?.sha || githubSha;
+      saveLocalSnapshot(false);
       renderAll();
-      toast(auto ? 'Cambio subido automáticamente a GitHub' : 'Cambios subidos a GitHub', 'ok');
+      toast('Cambios subidos a GitHub correctamente', 'ok');
     }catch(e){
       toast('Error subiendo cambios: ' + e.message, 'bad');
     }
