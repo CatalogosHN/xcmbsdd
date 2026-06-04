@@ -594,8 +594,8 @@
    * Cambia estos datos directamente en el archivo.
    * No se muestran en la pantalla de configuración.
    ************************************************************/
-  const KEYAUTH_APP_NAME = 'AQUI_TU_APPLICATION_NAME';
-  const KEYAUTH_OWNER_ID = 'AQUI_TU_OWNER_ID';
+  const KEYAUTH_APP_NAME = 'cambioscaja';
+  const KEYAUTH_OWNER_ID = 'RZsbvRZczd';
   const KEYAUTH_VERSION = '1.0';
   const KEYAUTH_API_URL = 'https://keyauth.win/api/1.3/';
 
@@ -604,6 +604,7 @@
   let githubSha = null;
   let currentItems = { cash:{}, bank:{} };
   let autoSyncTimer = null;
+  let keyauthSessionId = null;
 
   function canUseGithubSilently(){
     saveConfig();
@@ -996,7 +997,7 @@
   async function verifyLicense(){
     const license = document.getElementById('licenseInput').value.trim();
     if(!license) return toast('Pega una licencia KeyAuth', 'bad');
-    saveConfig();
+
     if(!KEYAUTH_APP_NAME || !KEYAUTH_OWNER_ID || !KEYAUTH_VERSION || KEYAUTH_APP_NAME.includes('AQUI_') || KEYAUTH_OWNER_ID.includes('AQUI_')){
       return toast('Falta cambiar los datos internos de KeyAuth dentro del archivo HTML', 'bad');
     }
@@ -1004,27 +1005,34 @@
     const hwid = getBrowserHwid();
     try{
       toast('Validando KeyAuth...', 'warn');
-      const initData = await fetchKeyauth({
-        type:'init',
-        ver:'1.0',
-        name:'cambioscaja',
-        ownerid:'RZsbvRZczd',
-        hash:'',
-        token:'',
-        thash:''
-      });
-      if(!initData.success || !initData.sessionid){
-        bankUnlocked = false;
-        renderBankLock();
-        return toast(initData.message || 'No se pudo inicializar KeyAuth', 'bad');
+
+      if(!keyauthSessionId){
+        const initData = await fetchKeyauth({
+          type:'init',
+          ver:KEYAUTH_VERSION,
+          name:KEYAUTH_APP_NAME,
+          ownerid:KEYAUTH_OWNER_ID,
+          hash:'undefined',
+          token:'undefined',
+          thash:'undefined'
+        });
+
+        if(!initData.success || !initData.sessionid){
+          keyauthSessionId = null;
+          bankUnlocked = false;
+          renderBankLock();
+          return toast(initData.message || 'No se pudo inicializar KeyAuth', 'bad');
+        }
+
+        keyauthSessionId = initData.sessionid;
       }
 
       const loginData = await fetchKeyauth({
         type:'license',
         key:license,
-        sessionid:initData.sessionid,
-        name:cambioscaja,
-        ownerid:RZsbvRZczd,
+        sessionid:keyauthSessionId,
+        name:KEYAUTH_APP_NAME,
+        ownerid:KEYAUTH_OWNER_ID,
         hwid:hwid,
         code:''
       });
@@ -1042,11 +1050,12 @@
     }catch(e){
       bankUnlocked = false;
       renderBankLock();
-      toast('No se pudo validar KeyAuth: ' + e.message + '. Si aparece Failed to fetch, el navegador bloqueó la API por CORS.', 'bad');
+      toast('No se pudo validar KeyAuth: ' + e.message + '. Si aparece Failed to fetch, el navegador bloqueó la API por CORS o no hay conexión.', 'bad');
     }
   }
 
   function lockBank(){
+    keyauthSessionId = null;
     bankUnlocked = false;
     document.getElementById('licenseInput').value = '';
     renderBankLock();
