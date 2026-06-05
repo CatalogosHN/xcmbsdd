@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-06-04T07:15:09.579Z",
+  "updatedAt": "2026-06-05T08:11:12.821Z",
   "cash": {
     "1": 16,
     "2": 3,
@@ -8,7 +8,7 @@
     "10": 11,
     "20": 13,
     "50": 15,
-    "100": 23,
+    "100": 30,
     "200": 9,
     "500": 0
   },
@@ -21,6 +21,19 @@
     "20000": 0
   },
   "logs": [
+    {
+      "id": "mq0nadxquqpwdu",
+      "area": "cash",
+      "action": "in",
+      "items": {
+        "100": 7
+      },
+      "note": "",
+      "total": 700,
+      "createdAt": "2026-06-05T08:11:06.638Z",
+      "editedAt": null,
+      "edits": []
+    },
     {
       "id": "mpz5uk650dvcsi",
       "area": "bank",
