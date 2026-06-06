@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
-  "updatedAt": "2026-06-05T08:11:12.821Z",
+  "updatedAt": "2026-06-06T19:38:38.855Z",
   "cash": {
-    "1": 16,
+    "1": 14,
     "2": 3,
     "5": 13,
-    "10": 11,
-    "20": 13,
+    "10": 12,
+    "20": 14,
     "50": 15,
-    "100": 30,
+    "100": 24,
     "200": 9,
     "500": 0
   },
@@ -21,6 +21,47 @@
     "20000": 0
   },
   "logs": [
+    {
+      "id": "mq2ra94ezlwyb5",
+      "area": "cash",
+      "action": "out",
+      "items": {
+        "100": 5
+      },
+      "note": "Dinero a billetera por si acaso",
+      "total": 500,
+      "createdAt": "2026-06-06T19:38:31.214Z",
+      "editedAt": null,
+      "edits": []
+    },
+    {
+      "id": "mq2r90etallgca",
+      "area": "cash",
+      "action": "in",
+      "items": {
+        "10": 1,
+        "20": 1
+      },
+      "note": "Cambio de agua",
+      "total": 30,
+      "createdAt": "2026-06-06T19:37:33.269Z",
+      "editedAt": null,
+      "edits": []
+    },
+    {
+      "id": "mq2r8ckkwwkclp",
+      "area": "cash",
+      "action": "out",
+      "items": {
+        "1": 2,
+        "100": 1
+      },
+      "note": "Agua pago",
+      "total": 102,
+      "createdAt": "2026-06-06T19:37:02.372Z",
+      "editedAt": null,
+      "edits": []
+    },
     {
       "id": "mq0nadxquqpwdu",
       "area": "cash",
